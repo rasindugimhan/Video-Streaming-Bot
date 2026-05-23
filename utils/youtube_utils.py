@@ -13,7 +13,7 @@ _YT_BYPASS_OPTS = {
     # that YouTube applies to datacenter IPs when using the default web client
     'extractor_args': {
         'youtube': {
-            'player_client': ['android', 'web_embedded'],
+            'player_client': ['ios', 'android'],
             'skip': ['dash', 'hls'],
         }
     },
@@ -73,14 +73,14 @@ class YouTubeDownloader:
                     ydl_opts['cookiefile'] = cookies_path
                     ydl_opts['extractor_args'] = {
                         'youtube': {
-                            'player_client': ['web', 'android'],
+                            'player_client': ['ios', 'android'],
                         }
                     }
                 else:
                     logger.info("No YouTube cookies found. Using default clients.")
                     ydl_opts['extractor_args'] = {
                         'youtube': {
-                            'player_client': ['android', 'web_embedded'],
+                            'player_client': ['ios', 'android'],
                         }
                     }
                     
@@ -159,7 +159,7 @@ class YouTubeDownloader:
                     'extract_flat': True,  # Extremely fast, only gets metadata, not full streams
                     'extractor_args': {
                         'youtube': {
-                            'player_client': ['android', 'web_embedded'],
+                            'player_client': ['ios', 'android'],
                         }
                     }
                 }
@@ -242,7 +242,7 @@ class YouTubeDownloader:
                 ydl_opts['cookiefile'] = cookies_path
                 ydl_opts['extractor_args'] = {
                     'youtube': {
-                        'player_client': ['web', 'android'],
+                        'player_client': ['ios', 'android'],
                         'skip': ['dash', 'hls'],
                     }
                 }

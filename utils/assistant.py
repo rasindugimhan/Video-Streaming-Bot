@@ -82,7 +82,7 @@ class AssistantManager:
                 from pytgcalls import filters
                 from pytgcalls.types.stream.stream_ended import StreamEnded
                 
-                @self.pytgcalls.on_update(filters.stream_end)
+                @self.pytgcalls.on_update(filters.stream_end())
                 async def on_stream_ended(client, update: StreamEnded):
                     # For video streams, it might trigger twice (audio and video). 
                     # We only trigger the next song when the Audio track finishes to avoid double-skips.
