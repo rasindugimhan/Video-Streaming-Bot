@@ -66,25 +66,6 @@ async def play_video(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None
     
     url = context.args[0]
     is_yt = "youtube.com" in url or "youtu.be" in url
-    is_playlist = "list=" in url
-    
-    if is_yt and is_playlist:
-        await status_msg.edit_text("🎬 <i>Extracting playlist items...</i>", parse_mode='HTML')
-        entries = await YouTubeDownloader.extract_playlist(url)
-        if not entries:
-            await status_msg.edit_text("❌ Failed to extract playlist.", parse_mode='HTML')
-            return
-            
-        items = [{'url': e['url'], 'title': e['title'], 'video': True, 'requester': update.effective_user.first_name} for e in entries]
-        was_empty = queue_manager.is_empty(chat_id)
-        queue_len = queue_manager.add_multiple(chat_id, items)
-        
-        if was_empty:
-            await status_msg.edit_text(f"✅ <b>Added {len(items)} items to queue.</b> Starting playback...", parse_mode='HTML')
-            await _start_playing_current_video(chat_id, assistant, status_msg)
-        else:
-            await status_msg.edit_text(f"✅ <b>Added {len(items)} items to queue.</b> (Total: {queue_len})", parse_mode='HTML')
-        return
         
     # Single URL
     if is_yt:

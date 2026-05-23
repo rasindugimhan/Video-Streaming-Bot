@@ -193,23 +193,63 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
                 logger.error(f"Error fetching played_time: {e}")
         await query.answer("Could not fetch progress", show_alert=True)
         return
+
+    # Queue management callbacks
+    elif data == "cb_queue":
+        await _show_queue(query.message.chat_id, query)
+        return
+        
+    elif data == "cb_q_close":
+        await query.message.delete()
+        return
+        
+    elif data == "cb_q_clear":
+        from utils.queue_manager import queue_manager
+        chat_id = query.message.chat_id
+        q = queue_manager.get_queue(chat_id)
+        current_idx = queue_manager.current_index.get(chat_id, 0)
+        
+        # Keep only the current item
+        if q and current_idx < len(q):
+            current_item = q[current_idx]
+            queue_manager.queues[chat_id] = [current_item]
+            queue_manager.current_index[chat_id] = 0
+            await query.answer("Queue cleared!")
+        else:
+            queue_manager.clear(chat_id)
+            await query.answer("Queue cleared!")
+            
+        await _show_queue(chat_id, query)
+        return
+        
+    elif data.startswith("cb_q_del_"):
+        from utils.queue_manager import queue_manager
+        idx_to_remove = int(data.split("_")[-1])
+        if queue_manager.remove_item(query.message.chat_id, idx_to_remove):
+            await query.answer("Track removed")
+        else:
+            await query.answer("Could not remove track", show_alert=True)
+        await _show_queue(query.message.chat_id, query)
+        return
     
     if data == "help_music":
         text = (
             "🎵 <b>Music & Download Commands:</b>\n\n"
             "• <code>/download_audio [URL]</code> - Download audio from YouTube as MP3\n"
-            "• <code>/play_music [URL]</code> - Stream music in video chat\n"
+            "• <code>/play [URL]</code> - Stream music in video chat\n"
             "• <code>/pause</code> - Pause current playback\n"
             "• <code>/resume</code> - Resume playback\n"
-            "• <code>/stop</code> - Stop playback\n\n"
+            "• <code>/stop</code> - Stop playback\n"
+            "• <code>/queue</code> - View and manage the queue\n\n"
             "<i>Example:</i> <code>/download_audio https://www.youtube.com/watch?v=dQw4w9WgXcQ</code>"
         )
     elif data == "help_video":
         text = (
             "🎬 <b>Video & Download Commands:</b>\n\n"
             "• <code>/download_video [URL]</code> - Download video from YouTube as MP4\n"
-            "• <code>/play_video [URL]</code> - Stream video in video chat\n"
-            "• <code>/play_stream [URL]</code> - Stream with auto-detect type\n\n"
+            "• <code>/vplay [URL]</code> - Stream video in video chat\n"
+            "• <code>/play_stream [URL]</code> - Stream with auto-detect type\n"
+            "• <code>/queue</code> - View and manage the queue\n\n"
             "<i>Example:</i> <code>/download_video https://www.youtube.com/watch?v=dQw4w9WgXcQ</code>"
         )
     elif data == "check_status":
@@ -261,3 +301,54 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
     reply_markup = InlineKeyboardMarkup(keyboard)
     
     await query.edit_message_text(text, reply_markup=reply_markup, parse_mode='HTML')
+
+async def _show_queue(chat_id: int, query_or_update):
+    """Helper to render the queue UI"""
+    from utils.queue_manager import queue_manager
+    q = queue_manager.get_queue(chat_id)
+    current_idx = queue_manager.current_index.get(chat_id, 0)
+    
+    if not q:
+        text = "📭 <b>The queue is currently empty.</b>"
+        markup = InlineKeyboardMarkup([[InlineKeyboardButton("❌ Close", callback_data="cb_q_close")]])
+    else:
+        text = "📋 <b>Current Queue:</b>\n\n"
+        keyboard = []
+        
+        # Display up to 10 upcoming tracks
+        start_idx = current_idx
+        end_idx = min(start_idx + 10, len(q))
+        
+        for i in range(start_idx, end_idx):
+            item = q[i]
+            prefix = "▶️" if i == current_idx else f"{i - current_idx}."
+            text += f"{prefix} <i>{item['title']}</i>\n"
+            
+            # Add a remove button for upcoming tracks (not the currently playing one)
+            if i > current_idx:
+                keyboard.append([InlineKeyboardButton(f"🗑 Remove Track {i - current_idx}", callback_data=f"cb_q_del_{i}")])
+                
+        if len(q) > end_idx:
+            text += f"\n<i>... and {len(q) - end_idx} more tracks.</i>"
+            
+        # Add bottom controls
+        keyboard.append([
+            InlineKeyboardButton("🗑 Clear All Upcoming", callback_data="cb_q_clear"),
+            InlineKeyboardButton("❌ Close", callback_data="cb_q_close")
+        ])
+        markup = InlineKeyboardMarkup(keyboard)
+        
+    if hasattr(query_or_update, 'message') and query_or_update.message:
+        # It's a callback query
+        await query_or_update.message.reply_html(text, reply_markup=markup)
+        try:
+            await query_or_update.answer()
+        except:
+            pass
+    else:
+        # It's a command update
+        await query_or_update.message.reply_html(text, reply_markup=markup)
+
+async def queue_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    """Handle /queue command"""
+    await _show_queue(update.effective_chat.id, update)

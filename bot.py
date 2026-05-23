@@ -20,7 +20,8 @@ from handlers.commands import (
     help_command,
     status_command,
     error_handler,
-    button_handler
+    button_handler,
+    queue_command
 )
 from handlers.music import (
     play_music,
@@ -76,6 +77,7 @@ class TelegramMusicBot:
         self.app.add_handler(CommandHandler("start", start_command))
         self.app.add_handler(CommandHandler("help", help_command))
         self.app.add_handler(CommandHandler("status", status_command))
+        self.app.add_handler(CommandHandler("queue", queue_command))
         
         # Music handlers
         self.app.add_handler(CommandHandler("play", play_music))

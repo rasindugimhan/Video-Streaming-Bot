@@ -66,6 +66,22 @@ class QueueManager:
         self.current_index.pop(chat_id, None)
         self.status_messages.pop(chat_id, None)
 
+    def remove_item(self, chat_id: int, index: int) -> bool:
+        """Remove a specific item from the queue by its index (0-based)"""
+        q = self.queues.get(chat_id, [])
+        if 0 <= index < len(q):
+            # We can't remove the currently playing item this way
+            current_idx = self.current_index.get(chat_id, 0)
+            if index == current_idx:
+                return False
+                
+            q.pop(index)
+            # Adjust current index if we removed an item before it
+            if index < current_idx:
+                self.current_index[chat_id] = current_idx - 1
+            return True
+        return False
+
     def is_empty(self, chat_id: int) -> bool:
         """Check if queue is empty"""
         return len(self.queues.get(chat_id, [])) == 0
