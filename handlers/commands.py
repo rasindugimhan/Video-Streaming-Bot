@@ -51,9 +51,11 @@ async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
 - Bot must be admin in group/channel
 - FFmpeg must be installed on the server
 
-<b>Issues?</b> Contact the administrator.
+<b>Issues?</b> Contact the administrator:
+- <b>GitHub:</b> <a href="https://github.com/rasindugimhan">@rasindugimhan</a>
+- <b>Telegram:</b> <a href="https://t.me/Dexter_RG">@Dexter_RG</a>
     """
-    await update.message.reply_text(help_text, parse_mode='HTML')
+    await update.message.reply_text(help_text, parse_mode='HTML', disable_web_page_preview=True)
 
 async def status_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Handle /status command"""
@@ -273,7 +275,10 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
             "ℹ️ <b>Ewings Bot Info:</b>\n\n"
             "✅ Streams audio and video using FFmpeg\n"
             "✅ Supports MP3, WAV, MP4, MKV, and HTTP/RTMP streams\n"
-            "⚠️ Bot must be an Administrator in the group/channel\n"
+            "⚠️ Bot must be an Administrator in the group/channel\n\n"
+            "👨‍💻 <b>Developer & Support:</b>\n"
+            "• <b>GitHub:</b> <a href=\"https://github.com/rasindugimhan\">@rasindugimhan</a>\n"
+            "• <b>Telegram:</b> <a href=\"https://t.me/Dexter_RG\">@Dexter_RG</a>\n"
         )
     elif data == "back_to_menu":
         keyboard = [

@@ -68,3 +68,10 @@ This bot is optimized for deployment on [Railway.app](https://railway.app/).
 
 ## 📜 License
 This project is open-source. Feel free to use and modify!
+
+---
+
+## 📞 Support & Contact
+If you have any issues, questions, or suggestions, feel free to contact me:
+- **GitHub**: [rasindugimhan](https://github.com/rasindugimhan)
+- **Telegram**: [@Dexter_RG](https://t.me/Dexter_RG)
