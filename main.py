@@ -4,6 +4,14 @@ Telegram Music & Video Streaming Bot
 Main entry point
 """
 
+# Monkeypatch pyrogram errors to satisfy py-tgcalls expectations
+try:
+    import pyrogram.errors
+    if not hasattr(pyrogram.errors, "GroupcallForbidden"):
+        pyrogram.errors.GroupcallForbidden = getattr(pyrogram.errors, "GroupCallForbidden", pyrogram.errors.RPCError)
+except Exception:
+    pass
+
 import sys
 import asyncio
 from bot import TelegramMusicBot
@@ -26,6 +34,9 @@ async def main():
     try:
         await bot.initialize()
         await bot.start()
+        # Keep the bot running until interrupted
+        while True:
+            await asyncio.sleep(3600)
     except KeyboardInterrupt:
         logger.info("Keyboard interrupt received")
     except Exception as e:
